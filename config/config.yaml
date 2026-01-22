@@ -1,0 +1,183 @@
+version: "0.1"
+
+llm:
+  encoder:
+    name: "gpt-oss-safeguard:20b_encoder"
+    temperature: 0
+    max_tokens: 512
+    timeout: 10
+    endpoint_env:
+      base_url: "SAFEGUARD_ENDPOINT_URL"
+      api_key: "SAFEGUARD_ENDPOINT_API_KEY"
+
+  worldmodel:
+    name: "gpt-oss-safeguard:20b_worldmodel"
+    temperature: 0
+    max_tokens: 1024
+    timeout: 15
+    endpoint_env:
+      base_url: "SAFEGUARD_ENDPOINT_URL"
+      api_key: "SAFEGUARD_ENDPOINT_API_KEY"
+
+  override:
+    name: "gpt-oss-safeguard:20b_override"
+    temperature: 0
+    max_tokens: 16384
+    timeout: 15
+    endpoint_env:
+      base_url: "SAFEGUARD_ENDPOINT_URL"
+      api_key: "SAFEGUARD_ENDPOINT_API_KEY"
+
+  aggregator:
+    name: "gpt-oss-safeguard:20b_aggregator"
+    temperature: 0
+    max_tokens: 1024
+    timeout: 15
+    endpoint_env:
+      base_url: "SAFEGUARD_ENDPOINT_URL"
+      api_key: "SAFEGUARD_ENDPOINT_API_KEY"
+
+encoders:
+  unicode_obfuscation:
+    id: "unicode_obfuscation"
+    type: "deterministic"
+    entrypoint: "source.encoders.encode_unicode_obfuscation"
+    outputs:
+      scores: ["unicode_obfuscation"]
+
+  canary_trigger:
+    id: "canary_trigger"
+    type: "deterministic"
+    entrypoint: "source.encoders.encode_canary_trigger"
+    outputs:
+      scores: ["canary_trigger"]
+
+  prompt_injection:
+    id: "prompt_injection"
+    type: "llm_judge"
+    entrypoint: "source.encoders.encode_prompt_injection"
+    outputs:
+      scores: ["control_score", "hijack_score", "evasion_score"]
+
+  policy_violation:
+    id: "policy_violation"
+    type: "llm_judge"
+    entrypoint: "source.encoders.encode_policy_violation"
+    outputs:
+      scores: ["general_policy_score", "developer_policy_score"]
+
+  memory_poisoning:
+    id: "memory_poisoning"
+    type: "llm_judge"
+    entrypoint: "source.encoders.encode_memory_poisoning"
+    outputs:
+      scores: ["memory_poisoning"]
+
+  backdoor_trigger:
+    id: "backdoor_trigger"
+    type: "llm_judge"
+    entrypoint: "source.encoders.encode_backdoor_trigger"
+    outputs:
+      scores: ["backdoor_trigger"]
+
+  tool_plan_risk:
+    id: "tool_plan_risk"
+    type: "llm_judge"
+    entrypoint: "source.encoders.encode_tool_plan_risk"
+    outputs:
+      scores: ["tool_plan_risk"]
+
+  task_drift:
+    id: "task_drift"
+    type: "llm_judge"
+    entrypoint: "source.encoders.encode_task_drift"
+    outputs:
+      scores: ["task_drift"]
+
+  pii_and_secrets:
+    id: "pii_and_secrets"
+    type: "deterministic"
+    entrypoint: "source.encoders.encode_pii_and_secrets"
+    outputs:
+      scores: ["secret_leak"]
+
+  tool_call_args:
+    id: "tool_call_args"
+    type: "llm_judge"
+    entrypoint: "source.encoders.encode_tool_call_args"
+    outputs:
+      scores: ["tool_args_risk"]
+
+hooks:
+  before_agent:
+    encoders:
+      - unicode_obfuscation
+      - prompt_injection
+      - policy_violation
+
+  after_agent:
+    encoders:
+      - canary_trigger
+      - policy_violation
+      - pii_and_secrets
+
+  before_model:
+    encoders:
+      - unicode_obfuscation
+      - canary_trigger
+      - prompt_injection
+      - policy_violation
+      - memory_poisoning
+      - backdoor_trigger
+      - pii_and_secrets
+
+  after_model:
+    encoders:
+      - canary_trigger
+      - tool_plan_risk
+      - task_drift
+      - pii_and_secrets
+
+  tool_wrapper:
+    encoders:
+      - tool_call_args
+
+score_profiles:
+  unicode_obfuscation:
+    influence_scope: observation
+
+  canary_trigger:
+    influence_scope: long_term_memory
+
+  backdoor_trigger:
+    influence_scope: long_term_memory
+
+  memory_poisoning:
+    influence_scope: long_term_memory
+
+  secret_leak:
+    influence_scope: short_term_memory
+
+  control_score:
+    influence_scope: short_term_memory
+
+  hijack_score:
+    influence_scope: short_term_memory
+
+  evasion_score:
+    influence_scope: short_term_memory
+
+  general_policy_score:
+    influence_scope: short_term_memory
+
+  developer_policy_score:
+    influence_scope: short_term_memory
+
+  tool_plan_risk:
+    influence_scope: short_term_memory
+
+  tool_args_risk:
+    influence_scope: observation
+
+  task_drift:
+    influence_scope: short_term_memory
