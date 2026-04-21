@@ -45,4 +45,4 @@ class SafeAgentWorldState(TypedDict):
     config: Dict[str, Any]
 
     # error for debug
-    error: Optional[str]
+    error: Annotated[List[str], operator.add]

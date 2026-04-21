@@ -1,0 +1,44 @@
+# Canary tokens for detecting prompt leakage, data exfiltration, or unauthorized access attempts
+# Canary tokens are intentionally planted strings used to catch security incidents
+
+# Example canaries:
+# - System prompt markers: "SYSTEM_PROMPT_MARKER", "INTERNAL_INSTRUCTION_START"
+# - Data exfiltration markers: "EXFILTRATION_TOKEN_123", "LEAK_TEST_ABC"
+# - Debug/testing markers: "DEBUG_MODE_ENABLED", "TEST_CANARY_XYZ"
+# - Secret placeholders: "SECRET_KEY_PLACEHOLDER", "API_TOKEN_TEST"
+
+# Add your canary tokens below (case-insensitive matching will be applied)
+canaries:
+  # System prompt leakage markers
+  - "SYSTEM_PROMPT_MARKER"
+  - "INTERNAL_INSTRUCTION_START"
+  - "INTERNAL_INSTRUCTION_END"
+  - "SYSTEM_INSTRUCTIONS_BEGIN"
+  - "SYSTEM_INSTRUCTIONS_END"
+  - "DEVELOPER_MODE_ENABLED"
+  - "ADMIN_MODE_ACTIVE"
+
+  # Data exfiltration markers
+  - "EXFILTRATION_TOKEN_123"
+  - "LEAK_TEST_ABC"
+  - "DATA_EXFILTRATION_MARKER"
+  - "SECRET_LEAK_DETECTED"
+  - "PII_EXFILTRATION"
+
+  # Debug/testing markers
+  - "DEBUG_MODE_ENABLED"
+  - "TEST_CANARY_XYZ"
+  - "BYPASS_DETECTED"
+  - "FILTER_BYPASSED"
+
+  # Secret placeholders
+  - "SECRET_KEY_PLACEHOLDER"
+  - "API_TOKEN_TEST"
+  - "CREDENTIAL_PLACEHOLDER"
+  - "PASSWORD_TEMPLATE"
+
+# Configuration options
+options:
+  case_sensitive: false  # If true, matching is case-sensitive; if false, case-insensitive
+  exact_match: false     # If true, only exact string matches; if false, substring matches allowed
+  max_evidence: 5       # Maximum number of evidence items to return

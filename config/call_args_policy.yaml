@@ -1,0 +1,265 @@
+# Tool Call Arguments Policy Configuration
+# This file defines security policies for tool call arguments validation
+
+# High-risk binaries for run_command
+denied_bins:
+  - "rm"
+  - "rmdir"
+  - "dd"
+  - "mkfs"
+  - "format"
+  - "fdisk"
+  - "mount"
+  - "umount"
+  - "useradd"
+  - "userdel"
+  - "usermod"
+  - "groupadd"
+  - "groupdel"
+  - "chmod"
+  - "chown"
+  - "chgrp"
+  - "iptables"
+  - "ifconfig"
+  - "route"
+  - "systemctl"
+  - "service"
+  - "crontab"
+  - "shutdown"
+  - "reboot"
+  - "poweroff"
+  - "halt"
+  - "init"
+  - "telinit"
+  - "killall"
+  - "pkill"
+  - "kill"
+  - "kill -9"
+  - "sudo"
+  - "su"
+  - "passwd"
+  - "visudo"
+  - "nohup"
+  - "screen"
+  - "tmux"
+
+# Allowed binaries for run_command (if specified, only these are allowed)
+allowed_bins:
+  - "ls"
+  - "pwd"
+  - "cd"
+  - "cat"
+  - "head"
+  - "tail"
+  - "grep"
+  - "find"
+  - "echo"
+  - "date"
+  - "whoami"
+  - "id"
+  - "uname"
+  - "df"
+  - "du"
+  - "free"
+  - "top"
+  - "ps"
+  - "netstat"
+  - "ping"
+  - "traceroute"
+  - "nslookup"
+  - "dig"
+  - "curl"
+  - "wget"
+  - "python"
+  - "python3"
+  - "node"
+  - "npm"
+  - "git"
+  - "docker"
+  - "docker-compose"
+
+# Dangerous shell operators
+dangerous_operators:
+  - "|"
+  - ";"
+  - "&&"
+  - "||"
+  - "$()"
+  - "`"
+  - ">"
+  - ">>"
+  - "2>&1"
+  - "<"
+  - "<<"
+
+# Privilege escalation patterns
+privilege_patterns:
+  - "sudo"
+  - "su -"
+  - "pkexec"
+  - "doas"
+  - "runuser"
+
+# Persistence patterns
+persistence_patterns:
+  - "nohup"
+  - "systemctl enable"
+  - "crontab -e"
+  - "systemd"
+  - "init.d"
+  - "rc.local"
+  - "~/.ssh/authorized_keys"
+  - "~/.bashrc"
+  - "~/.profile"
+  - "~/.zshrc"
+
+# Allowed path prefixes for filesystem tools
+path_allow_prefix:
+  - "/home/user"
+  - "/tmp"
+  - "/var/tmp"
+  - "/mnt/data"
+  - "./"
+
+# Denied path prefixes for filesystem tools
+path_deny_prefix:
+  - "/etc"
+  - "/root"
+  - "/boot"
+  - "/sys"
+  - "/proc"
+  - "/dev"
+  - "/bin"
+  - "/sbin"
+  - "/usr/bin"
+  - "/usr/sbin"
+  - "/usr/local/bin"
+  - "/usr/local/sbin"
+  - "~/.ssh"
+  - "~/.gnupg"
+  - "~/.config"
+
+# Allowed URL schemes for network tools
+allowed_url_schemes:
+  - "http"
+  - "https"
+
+# Denied URL schemes for network tools
+denied_url_schemes:
+  - "file"
+  - "ftp"
+  - "ftps"
+  - "sftp"
+  - "tftp"
+  - "gopher"
+
+# Allowed domains for network tools
+allowed_domains:
+  - "api.openai.com"
+  - "cdn.openai.com"
+  - "github.com"
+  - "pypi.org"
+  - "npmjs.com"
+
+# Denied domains for network tools
+denied_domains:
+  - "localhost"
+  - "127.0.0.1"
+  - "0.0.0.0"
+  - "192.168."
+  - "10."
+  - "172.16."
+  - "malicious-site.com"
+  - "phishing-site.com"
+
+# Internal IP ranges to flag
+internal_ip_ranges:
+  - "10.0.0.0/8"
+  - "172.16.0.0/12"
+  - "192.168.0.0/16"
+  - "127.0.0.0/8"
+  - "169.254.0.0/16"
+
+# Maximum command length (characters)
+max_command_length: 1000
+
+# Maximum path depth (number of directories)
+max_path_depth: 10
+
+# Maximum URL length (characters)
+max_url_length: 2000
+
+# Dangerous command patterns
+dangerous_command_patterns:
+  - "rm -rf"
+  - "dd if="
+  - "mkfs"
+  - "format c:"
+  - "shutdown -h"
+  - "reboot"
+  - "chmod 777"
+  - "chown root"
+  - "iptables -F"
+  - "systemctl stop"
+  - "service.*stop"
+  - "kill.*-9"
+  - "pkill.*-9"
+  - "curl.*bash"
+  - "wget.*bash"
+  - "eval\\s*\\("
+  - "exec\\s*\\("
+
+# Suspicious argument patterns
+suspicious_arg_patterns:
+  - "\\$\\(.*\\)"
+  - "`.*`"
+  - "\\|\\s*sh"
+  - "\\|\\s*bash"
+  - ";\\s*rm"
+  - "&&\\s*rm"
+  - ">/dev/"
+  - ">>/etc/"
+  - "2>/dev/null"
+  - ">~/.ssh"
+
+# Tool-specific policies
+tool_specific_policies:
+  run_command:
+    max_args: 20
+    allow_env_vars: false
+    allow_shell: false
+    allow_background: false
+    
+  write_file:
+    max_file_size: 10485760  # 10MB
+    denied_extensions:
+      - ".sh"
+      - ".bash"
+      - ".zsh"
+      - ".py"
+      - ".js"
+      - ".php"
+      - ".rb"
+      - ".pl"
+      - ".exe"
+      - ".dll"
+      - ".so"
+      - ".dylib"
+      - ".com"
+      - ".bat"
+      - ".cmd"
+      - ".ps1"
+      - ".vbs"
+      
+  read_file:
+    max_file_size: 10485760  # 10MB
+    
+  http_request:
+    max_body_size: 5242880  # 5MB
+    max_headers: 50
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "PATCH"

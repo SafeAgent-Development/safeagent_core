@@ -81,7 +81,6 @@ def validate_core_request(state: SafeAgentWorldState) -> Dict[str, Any]:
 
         # --- tool_wrapper: Single tool execution audit ---
         elif hook == "tool_wrapper":
-            _ensure_str_field(observation, "plan", allow_empty=False)
             _ensure_str_field(observation, "name", allow_empty=False)
 
             args = observation.get("args")
@@ -96,7 +95,7 @@ def validate_core_request(state: SafeAgentWorldState) -> Dict[str, Any]:
 
     except Exception as e:
         return {
-            "error": f"validate_core_request failed: {type(e).__name__}: {e}",
+            "error": [f"validate_core_request failed: {type(e).__name__}: {e}"],
         }
 
 
@@ -794,7 +793,7 @@ def validate_cfg(runtime_cfg: Dict[str, Any], dev_cfg: Dict[str, Any]) -> Dict[s
     except Exception as e:
         return {
             "config": None,
-            "error": f"{type(e).__name__}: {e}",
+            "error": [f"{type(e).__name__}: {e}"],
         }
 
     # --- merge configs: server <- dev <- runtime ---
@@ -803,5 +802,4 @@ def validate_cfg(runtime_cfg: Dict[str, Any], dev_cfg: Dict[str, Any]) -> Dict[s
 
     return {
         "config": merged,
-        "error": None,
     }

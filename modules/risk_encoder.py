@@ -137,5 +137,5 @@ async def safeagent_risk_encoder(state: SafeAgentWorldState) -> Dict[str, Any]:
             await asyncio.gather(*tasks, return_exceptions=True)
 
         return {
-            "error": f"{type(e).__name__}: {e}",
+            "error": [f"{type(e).__name__}: {e}"],
         }

@@ -88,10 +88,9 @@ async def world_model(state: SafeAgentWorldState) -> Dict[str, Any]:
         return {
             "consequence": consequence,
             "obs_evidence": composite,
-            "error": None,
         }
 
     except Exception as e:
         return {
-            "error": f"world_model failed: {type(e).__name__}: {e}",
+            "error": [f"world_model failed: {type(e).__name__}: {e}"],
         }

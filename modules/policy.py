@@ -159,7 +159,7 @@ async def safeagent_policy(state: SafeAgentWorldState) -> Dict[str, Any]:
     hook = state.get("hook")
     actions_for_hook = get_actions_for_hook(hook) if isinstance(hook, str) else None
     if not isinstance(hook, str) or not actions_for_hook:
-        return {"error": f"safeagent_policy: unsupported hook {hook!r}"}
+        return {"error": [f"safeagent_policy: unsupported hook {hook!r}"]}
 
     cfg: Dict[str, Any] = state.get("config") or {}
     policy_cfg: Dict[str, Any] = cfg.get("policy") or {}
@@ -270,6 +270,8 @@ async def safeagent_policy(state: SafeAgentWorldState) -> Dict[str, Any]:
 
     for action in filtered_consequence.keys():
         score = _score_action(action)
+        if action == "REPLAN" or "ROLLBACK":
+            score -= 1e-6
         if score > best_score:
             best_score = score
             best_action = action
@@ -277,6 +279,8 @@ async def safeagent_policy(state: SafeAgentWorldState) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "action": best_action,
         "violations": violations,
+        "runtime_replan_count": state["runtime_replan_count"] + 1 if best_action == "REPLAN" else state["runtime_replan_count"],
+        "runtime_rollback_count": state["runtime_rollback_count"] + 1 if best_action == "ROLLBACK" else state["runtime_rollback_count"]
     }
 
     # Only non-tool hooks carry LTM write decision

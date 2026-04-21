@@ -43,6 +43,8 @@ async def stm_scores_synchronize(state: SafeAgentWorldState) -> Dict[str, Any]:
     action = state.get("action")
     if not action:
         return {}
+    if action in ("CALL_ALLOW", "CALL_BLOCK", "CALL_REWRITE", "CALL_JIT_APPROVAL"):
+        return {}
 
     cfg: Dict[str, Any] = state.get("config") or {}
     score_profiles: Dict[str, Any] = (cfg.get("score_profiles") or {})
@@ -167,7 +169,7 @@ async def ltm_scores_synchronize(state: SafeAgentWorldState) -> Dict[str, Any]:
 
         ltm_next[k] = _ltm_softmax_blend(stm, ltm, temperature)
 
-    return {"stm_scores": {}, "ltm_scores": ltm_next}
+    return {"ltm_scores": ltm_next}
 
 
 async def stm_evidence_synchronize(state: SafeAgentWorldState) -> Dict[str, Any]:
@@ -190,12 +192,11 @@ async def stm_evidence_synchronize(state: SafeAgentWorldState) -> Dict[str, Any]
         obs_evidence.clear()
         return {
             "stm_evidence": [summary.strip()],
-            "error": None,
         }
 
     except Exception as e:
         return {
-            "error": f"stm_evidence_synchronize failed: {type(e).__name__}: {e}",
+            "error": [f"stm_evidence_synchronize failed: {type(e).__name__}: {e}"],
         }
 
 
@@ -222,10 +223,9 @@ async def ltm_evidence_synchronize(state: SafeAgentWorldState) -> Dict[str, Any]
         stm_evidence.clear()
         return {
             "ltm_evidence": [summary.strip()],
-            "error": None,
         }
 
     except Exception as e:
         return {
-            "error": f"ltm_evidence_synchronize failed: {type(e).__name__}: {e}",
+            "error": [f"ltm_evidence_synchronize failed: {type(e).__name__}: {e}"],
         }

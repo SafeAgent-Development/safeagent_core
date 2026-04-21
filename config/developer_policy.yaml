@@ -1,0 +1,125 @@
+# Developer Policy Configuration
+# This file defines application-specific restrictions and constraints
+
+# Forbidden capabilities - tools or actions that are not allowed
+forbidden_capabilities:
+  - "run system command"
+  - "execute shell"
+  - "sudo"
+  - "download from internet"
+  - "write files"
+  - "delete files"
+  - "modify system files"
+  - "access internal database"
+  - "disable security"
+  - "bypass firewall"
+  - "modify user permissions"
+
+# Restricted resources - paths, endpoints, or data that cannot be accessed
+restricted_resources:
+  - "/etc/passwd"
+  - "/etc/shadow"
+  - "/etc/sudoers"
+  - "/root/.ssh"
+  - "/home/.ssh"
+  - "internal://database"
+  - "internal://api"
+  - "localhost:8080/admin"
+
+# Forbidden intents - specific goals or actions that are prohibited
+forbidden_intents:
+  - "delete all emails"
+  - "exfiltrate data"
+  - "disable audit logging"
+  - "disable monitoring"
+  - "bypass security controls"
+  - "escalate privileges"
+  - "access user data without authorization"
+  - "modify system configuration"
+  - "shutdown system"
+  - "reboot system"
+
+# Allowed tools - tools that are explicitly allowed (optional)
+# If this list is empty, all tools are allowed unless explicitly forbidden
+allowed_tools:
+  - "read_file"
+  - "write_file"
+  - "search"
+  - "web_search"
+  - "calculate"
+  - "format_text"
+
+# Denied tools - tools that are explicitly denied
+denied_tools:
+  - "run_command"
+  - "execute"
+  - "shell"
+  - "sudo"
+  - "chmod"
+  - "chown"
+  - "mount"
+  - "umount"
+  - "iptables"
+  - "systemctl"
+  - "crontab"
+
+# Allowed file paths - paths that are safe to access
+allowed_paths:
+  - "/home/user/documents"
+  - "/home/user/downloads"
+  - "/tmp"
+  - "/var/tmp"
+
+# Denied file paths - paths that are dangerous to access
+denied_paths:
+  - "/etc"
+  - "/root"
+  - "/boot"
+  - "/sys"
+  - "/proc"
+  - "/dev"
+  - "/bin"
+  - "/sbin"
+
+# Allowed domains - external domains that are safe to access
+allowed_domains:
+  - "api.openai.com"
+  - "cdn.openai.com"
+
+# Denied domains - external domains that are not allowed
+denied_domains:
+  - "malicious-site.com"
+  - "phishing-site.com"
+  - "internal-corp.com"
+
+# Maximum file size limit (in bytes)
+max_file_size: 10485760  # 10MB
+
+# Maximum network request limit (in bytes)
+max_network_request: 5242880  # 5MB
+
+# Rate limiting
+rate_limits:
+  max_calls_per_minute: 60
+  max_calls_per_hour: 1000
+
+# Content restrictions
+content_restrictions:
+  forbidden_keywords:
+    - "malware"
+    - "virus"
+    - "trojan"
+    - "backdoor"
+    - "exploit"
+    - "hack"
+    - "crack"
+    - "bypass"
+    - "evade"
+    - "circumvent"
+  
+  forbidden_patterns:
+    - "ignore.*safety"
+    - "bypass.*security"
+    - "disable.*protection"
+    - "override.*policy"
+    - "evade.*detection"

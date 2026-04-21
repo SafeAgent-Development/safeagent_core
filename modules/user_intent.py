@@ -47,10 +47,9 @@ async def user_intent(state: SafeAgentWorldState) -> Dict[str, Any]:
 
         return {
             "user_intent": intent.strip(),
-            "error": None,
         }
 
     except Exception as e:
         return {
-            "error": f"user_intent failed: {type(e).__name__}: {e}",
+            "error": [f"user_intent failed: {type(e).__name__}: {e}"],
         }

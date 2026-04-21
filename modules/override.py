@@ -4,7 +4,7 @@ import json
 from typing import Any, Dict
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 
 from source.states import SafeAgentWorldState
 from source.utils import get_runnable_llm
@@ -68,14 +68,15 @@ async def override_generate(state: SafeAgentWorldState) -> Dict[str, Any]:
             if not str(payload.get("content", "")).strip():
                 return {}
 
-            chain = content_prompt | llm | JsonOutputParser()
-            out = await chain.ainvoke({"payload": json.dumps(payload, ensure_ascii=False)})
+            chain = content_prompt | llm | StrOutputParser()
+            override_val = await chain.ainvoke(
+                {"payload": json.dumps(payload, ensure_ascii=False)}
+            )
 
-            override_val = out.get("override")
             if not isinstance(override_val, str) or not override_val.strip():
                 raise ValueError("override missing or empty")
 
-            override = {"override": override_val}
+            override = {"override": override_val.strip()}
 
         # function-call override: expects {"override": <object>}
         else:
@@ -91,7 +92,7 @@ async def override_generate(state: SafeAgentWorldState) -> Dict[str, Any]:
 
             override = {"override": override_val}
 
-        return {"override": override, "error": None}
+        return {"override": override}
 
     except Exception as e:
-        return {"error": f"override_generate failed: {type(e).__name__}: {e}"}
+        return {"error": [f"override_generate failed: {type(e).__name__}: {e}"]}

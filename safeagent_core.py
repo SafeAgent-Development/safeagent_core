@@ -75,11 +75,11 @@ async def safeagent_register_session(
         override={}, candidates={}, consequence={}, violations=[],
         runtime_replan_count=0, runtime_rollback_count=0,
         runtime_trajectory_length=0, runtime_last_user_stm_scores={},
-        config=merged_cfg, error=None,
+        config=merged_cfg, error=[],
     )
 
     # Persist as initial checkpoint (no graph execution)
-    await safeagent_app.update_state(
+    safeagent_app.update_state(
         config={"configurable": {"thread_id": session_id}},
         values=base_state,
     )
@@ -153,7 +153,7 @@ async def safeagent_step(session_id: str, core_request: Dict[str, Any]) -> Dict[
     state_delta = {
         "hook": hook,
         "observation": observation,
-        "error": None,
+        "error": [],
     }
 
     try:

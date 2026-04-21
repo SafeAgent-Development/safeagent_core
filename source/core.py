@@ -16,7 +16,7 @@ from modules.sync import (
 from modules.user_intent import user_intent
 from modules.world_model import world_model
 
-from states import SafeAgentWorldState
+from source.states import SafeAgentWorldState
 
 
 def build_safeagent_core_graph() -> CompiledStateGraph:
@@ -102,15 +102,7 @@ def build_safeagent_core_graph() -> CompiledStateGraph:
     graph.add_edge("call_budget_control", "risk_encoder")
     graph.add_edge("call_budget_control", "user_intent")
 
-    # STM / LTM sync pipeline runs in parallel from entry
-    graph.add_edge("call_budget_control", "stm_scores_synchronize")
-    graph.add_edge("stm_scores_synchronize", "stm_evidence_synchronize")
-    graph.add_edge("stm_evidence_synchronize", "ltm_scores_synchronize")
-    graph.add_edge("ltm_scores_synchronize", "ltm_evidence_synchronize")
-
-    # risk_encoder, user_intent, and ltm_evidence_synchronize all feed into
-    # compute_advantage_cost (join point)
-    graph.add_edge("ltm_evidence_synchronize", "compute_advantage_cost")
+    # risk_encoder, user_intent, feed into compute_advantage_cost (join point)
     graph.add_edge("risk_encoder", "compute_advantage_cost")
     graph.add_edge("user_intent", "compute_advantage_cost")
 
@@ -125,16 +117,17 @@ def build_safeagent_core_graph() -> CompiledStateGraph:
 
     # Both policy and override_generate are terminal for this graph.
     # The controller reads action / override / scores from the final state.
-    graph.add_edge("policy", END)
-    graph.add_edge("override_generate", END)
+    graph.add_edge("policy", "stm_scores_synchronize")
+    graph.add_edge("override_generate", "stm_scores_synchronize")
 
-    return graph.compile()
+    # STM / LTM sync pipeline
+    graph.add_edge("stm_scores_synchronize", "ltm_scores_synchronize")
+    graph.add_edge("ltm_scores_synchronize", "stm_evidence_synchronize")
+    graph.add_edge("stm_evidence_synchronize", "ltm_evidence_synchronize")
+    graph.add_edge("ltm_evidence_synchronize", END)
 
+    return graph.compile(checkpointer=MemorySaver())
 
-# Global (or injected) checkpointer
-checkpointer = MemorySaver()
 
 # Main SafeAgent app with checkpointer enabled
-safeagent_app = build_safeagent_core_graph().with_config(
-    checkpointer=checkpointer
-)
+safeagent_app = build_safeagent_core_graph()

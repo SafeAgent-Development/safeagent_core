@@ -213,7 +213,7 @@ async def compute_advantage_cost(state: SafeAgentWorldState) -> Dict[str, Any]:
     # action list: prefer enumerator output, fallback to default sets
     actions = get_actions_for_hook(hook)
     if not actions:
-        return {"error": f"compute_advantage_cost: no actions for hook={hook}"}
+        return {"error": [f"compute_advantage_cost: no actions for hook={hook}"]}
     candidates["actions"] = actions
 
     # choose which advantage/cost function to call
@@ -244,10 +244,9 @@ async def compute_advantage_cost(state: SafeAgentWorldState) -> Dict[str, Any]:
 
     else:
         return {
-            "error": f"compute_advantage_cost: unsupported hook={hook}",
+            "error": [f"compute_advantage_cost: unsupported hook={hook}"],
         }
 
     return {
         "candidates": candidates,
-        "error": None,
     }

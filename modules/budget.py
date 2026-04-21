@@ -67,5 +67,4 @@ async def call_budget_control(state: SafeAgentWorldState) -> Dict[str, Any]:
 
     return {
         "call_history": new_entry,
-        "error": None,
     }
