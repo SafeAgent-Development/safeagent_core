@@ -13,6 +13,10 @@ _CFG: Dict[str, Any] | None = None
 _CFG_LOCK = threading.Lock()
 _LLM_CACHE: Dict[str, ChatOpenAI] = {}
 _LLM_LOCK = threading.Lock()
+_DEV_POLICY: Dict[str, Any] | None = None
+_DEV_POLICY_LOCK = threading.Lock()
+_CALL_ARGS_POLICY: Dict[str, Any] | None = None
+_CALL_ARGS_POLICY_LOCK = threading.Lock()
 
 
 def get_cfg() -> Dict[str, Any]:
@@ -21,10 +25,87 @@ def get_cfg() -> Dict[str, Any]:
     if _CFG is None:
         with _CFG_LOCK:
             if _CFG is None:
-                path = "safeagent_core/config.yaml"
+                from pathlib import Path
+                
+                possible_paths = [
+                    "safeagent_core/config.yaml",
+                    "config/config.yaml",
+                    "../config/config.yaml",
+                    str(Path(__file__).parent.parent / "config" / "config.yaml"),
+                ]
+                
+                path = None
+                for possible_path in possible_paths:
+                    if Path(possible_path).exists():
+                        path = possible_path
+                        break
+                
+                if path is None:
+                    raise FileNotFoundError(
+                        f"Config file not found. Tried: {possible_paths}"
+                    )
+                
                 with open(path, "r", encoding="utf-8") as f:
                     _CFG = yaml.safe_load(f) or {}
     return _CFG
+
+
+def get_developer_policy() -> Dict[str, Any]:
+    """Load developer policy YAML config once."""
+    global _DEV_POLICY
+    if _DEV_POLICY is None:
+        with _DEV_POLICY_LOCK:
+            if _DEV_POLICY is None:
+                from pathlib import Path
+                
+                possible_paths = [
+                    "safeagent_core/config/developer_policy.yaml",
+                    "config/developer_policy.yaml",
+                    "../config/developer_policy.yaml",
+                    str(Path(__file__).parent.parent / "config" / "developer_policy.yaml"),
+                ]
+                
+                path = None
+                for possible_path in possible_paths:
+                    if Path(possible_path).exists():
+                        path = possible_path
+                        break
+                
+                if path is None:
+                    _DEV_POLICY = {}
+                else:
+                    with open(path, "r", encoding="utf-8") as f:
+                        _DEV_POLICY = yaml.safe_load(f) or {}
+    return _DEV_POLICY
+
+
+def get_call_args_policy() -> Dict[str, Any]:
+    """Load tool call arguments policy YAML config once."""
+    global _CALL_ARGS_POLICY
+    if _CALL_ARGS_POLICY is None:
+        with _CALL_ARGS_POLICY_LOCK:
+            if _CALL_ARGS_POLICY is None:
+                from pathlib import Path
+                
+                possible_paths = [
+                    "safeagent_core/config/call_args_policy.yaml",
+                    "config/call_args_policy.yaml",
+                    "../config/call_args_policy.yaml",
+                    str(Path(__file__).parent.parent / "config" / "call_args_policy.yaml"),
+                ]
+                
+                path = None
+                for possible_path in possible_paths:
+                    if Path(possible_path).exists():
+                        path = possible_path
+                        break
+                
+                if path is None:
+                    _CALL_ARGS_POLICY = {}
+                else:
+                    with open(path, "r", encoding="utf-8") as f:
+                        _CALL_ARGS_POLICY = yaml.safe_load(f) or {}
+    return _CALL_ARGS_POLICY
 
 
 def get_scope_params(
